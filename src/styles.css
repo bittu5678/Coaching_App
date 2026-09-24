@@ -161,9 +161,6 @@
   filter: blur(140px);
   opacity: 0.22;
 }
-.logo-symbol {
-  transform: rotate(-2deg);
-}
 .stat-primary {
   color: var(--primary);
   background: color-mix(in oklab, var(--primary) 14%, transparent);

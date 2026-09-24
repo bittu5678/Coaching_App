@@ -4,17 +4,18 @@ import CoachingApp from "@/components/CoachingApp";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "CoachingApp — Coaching Management & Online Tests" },
+      { title: "Coaching App" },
       {
         name: "description",
         content:
-          "Manage students, online tests, results, and learning performance with CoachingApp.",
+          "Manage students, online tests, results, and learning performance with Coaching App.",
       },
-      { property: "og:title", content: "CoachingApp — Coaching Management & Online Tests" },
+      { property: "og:title", content: "Coaching App" },
       {
         property: "og:description",
         content: "A modern workspace for coaching institutes and their students.",
       },
+      { property: "og:image", content: "/assets/coaching-app-logo.png" },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],

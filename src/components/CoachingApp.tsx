@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState, type FormEvent } from "react";
 import {
+  AlertCircle,
   Bell,
   BookOpen,
   CalendarDays,
@@ -28,6 +29,7 @@ import {
   Target,
   TrendingUp,
   Trophy,
+  User,
   UserRound,
   Users,
   X,
@@ -70,21 +72,218 @@ const studentNav: Array<[string, IconType]> = [
   ["Settings", Settings],
 ];
 
-export function CoachingLogo({ compact = false }: { compact?: boolean }) {
-  return (
-    <div className="flex items-center gap-3" aria-label="CoachingApp">
-      <div className="logo-symbol relative grid size-11 shrink-0 place-items-center rounded-[14px] bg-primary text-primary-foreground shadow-brand transition-transform duration-200 hover:scale-105">
-        <GraduationCap className="size-6" strokeWidth={2.4} />
-        <span className="absolute -bottom-1 -right-1 grid size-4 place-items-center rounded-full bg-brand-orange ring-[3px] ring-background">
-          <BookOpen className="size-2.5 text-brand-orange-foreground" strokeWidth={2.6} />
-        </span>
+export function CoachingLogo({
+  compact = false,
+  size = "default",
+  className,
+}: {
+  compact?: boolean;
+  size?: "compact" | "default" | "prominent" | "sidebar" | "header";
+  className?: string;
+}) {
+  if (compact || size === "compact") {
+    return (
+      <div
+        className={cn(
+          "inline-flex shrink-0 items-center justify-center rounded-2xl bg-white p-1.5 shadow-sm ring-1 ring-border/40 transition-transform duration-200 hover:scale-105",
+          className,
+        )}
+        aria-label="Coaching App Logo"
+      >
+        <img
+          src="/assets/coaching-app-logo.png"
+          alt="Coaching App Logo"
+          className="size-9 rounded-xl object-contain sm:size-10"
+          referrerPolicy="no-referrer"
+        />
       </div>
-      {!compact && (
-        <span className="text-[21px] font-bold tracking-tight text-foreground">
+    );
+  }
+
+  if (size === "header") {
+    return (
+      <div
+        className={cn(
+          "inline-flex items-center gap-2.5 sm:gap-3 transition-transform duration-200 hover:scale-[1.01]",
+          className,
+        )}
+        aria-label="Coaching App Logo"
+      >
+        <div className="rounded-2xl bg-white p-1 sm:p-1.5 shadow-sm ring-1 ring-border/40 shrink-0">
+          <img
+            src="/assets/coaching-app-logo.png"
+            alt="Coaching App Logo"
+            className="h-9 w-9 rounded-xl object-contain sm:h-11 sm:w-11"
+            referrerPolicy="no-referrer"
+          />
+        </div>
+        <div className="flex flex-col">
+          <div className="flex items-center gap-1.5 sm:gap-2">
+            <span className="text-base font-bold leading-tight tracking-tight text-foreground sm:text-lg">
+              Coaching<span className="text-primary">App</span>
+            </span>
+          </div>
+          <span className="text-[9px] font-semibold tracking-wider text-muted-foreground uppercase hidden xs:block sm:text-[10px]">
+            Online Test & Coaching Platform
+          </span>
+        </div>
+      </div>
+    );
+  }
+
+  if (size === "prominent") {
+    return (
+      <div
+        className={cn("flex flex-col items-center justify-center", className)}
+        aria-label="Coaching App Logo"
+      >
+        <div className="rounded-3xl bg-white p-3.5 shadow-lg ring-1 ring-border/50">
+          <img
+            src="/assets/coaching-app-logo.png"
+            alt="Coaching App Logo"
+            className="h-24 w-24 object-contain sm:h-32 sm:w-32"
+            referrerPolicy="no-referrer"
+          />
+        </div>
+      </div>
+    );
+  }
+
+  if (size === "sidebar") {
+    return (
+      <div
+        className={cn(
+          "flex w-full items-center justify-center rounded-2xl bg-white p-2.5 sm:p-3 shadow-sm ring-1 ring-border/40 transition-transform duration-200 hover:scale-[1.02]",
+          className,
+        )}
+        aria-label="Coaching App Logo"
+      >
+        <img
+          src="/assets/coaching-app-logo.png"
+          alt="Coaching App Logo"
+          className="h-16 w-auto max-w-[180px] object-contain sm:h-20 sm:max-w-[200px]"
+          referrerPolicy="no-referrer"
+        />
+      </div>
+    );
+  }
+
+  return (
+    <div
+      className={cn(
+        "inline-flex items-center gap-2.5 sm:gap-3 transition-transform duration-200 hover:scale-[1.02]",
+        className,
+      )}
+      aria-label="Coaching App Logo"
+    >
+      <div className="rounded-2xl bg-white p-1.5 shadow-sm ring-1 ring-border/40 shrink-0">
+        <img
+          src="/assets/coaching-app-logo.png"
+          alt="Coaching App Logo"
+          className="h-9 w-9 rounded-xl object-contain sm:h-11 sm:w-11"
+          referrerPolicy="no-referrer"
+        />
+      </div>
+      <div className="flex flex-col">
+        <span className="text-base font-bold leading-tight tracking-tight text-foreground sm:text-[19px]">
           Coaching<span className="text-primary">App</span>
         </span>
-      )}
+        <span className="text-[8px] font-semibold tracking-wider text-muted-foreground uppercase sm:text-[9px]">
+          Online Test Platform
+        </span>
+      </div>
     </div>
+  );
+}
+
+export function DashboardBrandBanner({
+  role,
+  onStartTest,
+}: {
+  role: Role;
+  onStartTest?: () => void;
+}) {
+  if (role === "admin") {
+    return (
+      <section className="glass-card relative overflow-hidden rounded-[20px] p-4 sm:p-6 bg-gradient-to-r from-card via-card to-primary/5 border border-border/80 shadow-card">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="flex items-center gap-3.5 sm:gap-4 min-w-0">
+            <div className="rounded-2xl bg-white p-2 sm:p-2.5 shadow-md ring-1 ring-border/50 shrink-0">
+              <img
+                src="/assets/coaching-app-logo.png"
+                alt="Coaching App Logo"
+                className="h-12 w-12 sm:h-16 sm:w-16 object-contain"
+                referrerPolicy="no-referrer"
+              />
+            </div>
+            <div className="min-w-0">
+              <div className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-2.5 py-0.5 text-[11px] font-semibold text-primary mb-1">
+                <Sparkles className="size-3" /> Official Institute Portal
+              </div>
+              <h2 className="text-lg sm:text-2xl font-bold tracking-tight text-foreground truncate">
+                Coaching App Administration
+              </h2>
+              <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">
+                Centralized institute management, live test monitoring & student analytics
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2 self-start sm:self-center shrink-0">
+            <span className="inline-flex items-center gap-1.5 rounded-xl bg-card border border-border/80 px-3 py-1.5 text-xs font-medium text-foreground shadow-xs">
+              <CheckCircle2 className="size-3.5 text-emerald-500" /> System Active
+            </span>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  return (
+    <section className="student-banner glass-card relative overflow-hidden rounded-[20px] bg-gradient-to-r from-blue-700 via-blue-600 to-indigo-700 p-5 sm:p-7 text-white shadow-brand">
+      <div className="relative z-10 flex flex-col md:flex-row md:items-center md:justify-between gap-5">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-5 min-w-0">
+          <div className="rounded-2xl bg-white p-2.5 sm:p-3 shadow-xl ring-1 ring-white/20 shrink-0 self-start sm:self-center">
+            <img
+              src="/assets/coaching-app-logo.png"
+              alt="Coaching App Logo"
+              className="h-14 w-14 sm:h-18 sm:w-18 object-contain"
+              referrerPolicy="no-referrer"
+            />
+          </div>
+          <div className="max-w-xl min-w-0">
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-white/15 px-3 py-1 text-xs font-semibold text-white backdrop-blur-md">
+              <Trophy className="size-3.5" /> Official Student Portal
+            </span>
+            <h2 className="mt-2 text-xl font-bold sm:text-3xl leading-snug">
+              Online Test & Coaching Workspace
+            </h2>
+            <p className="mt-1 text-xs sm:text-sm text-blue-100/90 leading-relaxed">
+              Take timed mock exams, track subject accuracy, and review comprehensive test
+              performance.
+            </p>
+            <div className="mt-3.5 flex items-center gap-3">
+              <div className="w-full max-w-xs">
+                <AnimatedProgressBar value={72} className="bg-white/20" />
+              </div>
+              <span className="text-xs sm:text-sm font-bold tabular-nums shrink-0">
+                72% Completed
+              </span>
+            </div>
+          </div>
+        </div>
+        <div className="flex sm:flex-col items-center sm:items-end gap-2.5 self-start md:self-center shrink-0">
+          {onStartTest && (
+            <Button
+              onClick={onStartTest}
+              className="w-full sm:w-auto rounded-xl bg-white text-blue-700 font-semibold shadow-md hover:bg-blue-50 transition-transform active:scale-95"
+            >
+              <ClipboardCheck className="size-4 mr-2" /> Start Practice Test
+            </Button>
+          )}
+        </div>
+      </div>
+      <Trophy className="absolute -bottom-8 right-6 size-44 text-white opacity-10 pointer-events-none" />
+    </section>
   );
 }
 
@@ -201,7 +400,27 @@ export default function CoachingApp() {
     setSession(null);
   };
 
-  if (!ready) return <div className="min-h-screen bg-background" />;
+  if (!ready) {
+    return (
+      <div className="flex min-h-screen flex-col items-center justify-center bg-background px-4">
+        <div className="flex flex-col items-center animate-rise">
+          <div className="rounded-3xl bg-white p-4 shadow-xl ring-1 ring-border/40">
+            <img
+              src="/assets/coaching-app-logo.png"
+              alt="Coaching App Logo"
+              className="h-28 w-28 object-contain animate-pulse sm:h-32 sm:w-32"
+              referrerPolicy="no-referrer"
+            />
+          </div>
+          <p className="mt-5 text-base font-bold tracking-tight text-foreground">Coaching App</p>
+          <div className="mt-2 flex items-center gap-2 text-xs text-muted-foreground">
+            <div className="size-2 rounded-full bg-primary animate-ping" />
+            <span>Loading workspace...</span>
+          </div>
+        </div>
+      </div>
+    );
+  }
   return session ? (
     <Dashboard role={session} theme={theme} setTheme={setTheme} logout={logout} />
   ) : (
@@ -231,7 +450,7 @@ function Login({
 
   return (
     <main className="login-shell relative min-h-screen overflow-hidden bg-background">
-      <div className="absolute inset-x-0 top-0 z-20 flex items-center justify-between px-5 py-5 sm:px-8 lg:px-12">
+      <div className="absolute inset-x-0 top-0 z-20 flex items-center justify-between px-3.5 py-4 sm:px-8 sm:py-5 lg:px-12">
         <CoachingLogo />
         <ThemeToggle theme={theme} setTheme={setTheme} />
       </div>
@@ -239,9 +458,19 @@ function Login({
         <section className="login-art relative hidden overflow-hidden bg-sidebar lg:flex lg:flex-col lg:justify-end lg:p-14 xl:p-20">
           <div className="visual-grid absolute inset-0 opacity-60" />
           <div className="relative z-10 max-w-xl pb-8">
-            <span className="mb-6 inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/10 px-4 py-2 text-xs font-semibold text-primary backdrop-blur-md">
-              <Sparkles className="size-4 animate-spin-slow" /> Smart learning, simplified
-            </span>
+            <div className="mb-6 inline-flex rounded-3xl bg-white p-3.5 shadow-xl ring-1 ring-border/30">
+              <img
+                src="/assets/coaching-app-logo.png"
+                alt="Coaching App Logo"
+                className="h-20 w-20 object-contain"
+                referrerPolicy="no-referrer"
+              />
+            </div>
+            <div className="mb-4">
+              <span className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/10 px-4 py-2 text-xs font-semibold text-primary backdrop-blur-md">
+                <Sparkles className="size-4 animate-spin-slow" /> Smart learning, simplified
+              </span>
+            </div>
             <h1 className="text-5xl font-bold leading-[1.12] text-foreground xl:text-6xl">
               Everything your coaching institute needs.
             </h1>
@@ -258,20 +487,31 @@ function Login({
           <div className="login-glow animate-pulse-glow absolute -right-28 top-28 size-[430px] rounded-full" />
         </section>
 
-        <section className="flex items-center justify-center px-5 pb-10 pt-28 sm:px-10 lg:pt-24">
-          <div className="glass-card w-full max-w-md animate-rise p-8 sm:p-10">
-            <div className="mb-6 lg:hidden">
-              <span className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-3 py-1.5 text-xs font-semibold text-primary">
-                <Zap className="size-3.5" /> Learn. Test. Grow.
-              </span>
+        <section className="flex items-center justify-center px-4 pb-10 pt-24 sm:px-10 lg:pt-24">
+          <div className="glass-card w-full max-w-md animate-rise p-6 sm:p-10">
+            {/* Centered full official logo prominently above login form */}
+            <div className="mb-6 flex justify-center">
+              <div className="rounded-3xl bg-white p-3.5 shadow-md ring-1 ring-border/40">
+                <img
+                  src="/assets/coaching-app-logo.png"
+                  alt="Coaching App Logo"
+                  className="h-24 w-24 object-contain sm:h-28 sm:w-28"
+                  referrerPolicy="no-referrer"
+                />
+              </div>
             </div>
-            <p className="text-xs font-bold tracking-wider text-primary uppercase">Welcome Back</p>
-            <h2 className="mt-2 text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
-              Sign in to CoachingApp
-            </h2>
-            <p className="mt-2 text-sm leading-6 text-muted-foreground">
-              Enter your details to access your workspace.
-            </p>
+
+            <div className="text-center">
+              <p className="text-xs font-bold tracking-wider text-primary uppercase">
+                Welcome Back
+              </p>
+              <h2 className="mt-1.5 text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
+                Sign in to Coaching App
+              </h2>
+              <p className="mt-1 text-xs text-muted-foreground sm:text-sm">
+                Enter your details to access your workspace.
+              </p>
+            </div>
 
             <div
               className="mt-7 grid grid-cols-2 rounded-2xl bg-muted/70 p-1.5"
@@ -403,8 +643,6 @@ function Dashboard({
   const [isRefreshing, setIsRefreshing] = useState(false);
 
   const nav = role === "admin" ? adminNav : studentNav;
-  const title =
-    active === "Dashboard" ? `Good morning, ${role === "admin" ? "Amar" : "Aarav"}` : active;
 
   const handleRefresh = () => {
     setIsRefreshing(true);
@@ -413,7 +651,7 @@ function Dashboard({
   };
 
   return (
-    <div className="min-h-screen bg-background text-foreground transition-colors duration-300">
+    <div className="min-h-screen bg-background text-foreground transition-colors duration-300 w-full">
       {/* Desktop Sidebar with smooth collapse / expand */}
       <aside
         className={cn(
@@ -421,8 +659,8 @@ function Dashboard({
           collapsed ? "w-[84px] px-3 py-6" : "w-[264px] px-4 py-6",
         )}
       >
-        <div className="flex items-center justify-between px-2">
-          <CoachingLogo compact={collapsed} />
+        <div className="flex items-center justify-between px-1">
+          <CoachingLogo compact={collapsed} size={collapsed ? "compact" : "sidebar"} />
         </div>
 
         <nav className="mt-9 flex-1 space-y-1.5">
@@ -449,7 +687,7 @@ function Dashboard({
             <p className="mt-1 text-[11px] leading-4 text-muted-foreground">
               {role === "admin"
                 ? "Explore smart reports and student test metrics."
-                : "You’ve studied 5 days in a row!"}
+                : "You’ve studied consistently this week!"}
             </p>
           </div>
         )}
@@ -494,7 +732,7 @@ function Dashboard({
           onClick={() => setMobileMenu(false)}
         >
           <aside
-            className="animate-rise h-full w-[290px] border-r border-sidebar-border bg-sidebar p-5 shadow-2xl"
+            className="animate-rise h-full w-[82vw] max-w-[290px] overflow-y-auto border-r border-sidebar-border bg-sidebar p-5 shadow-2xl"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between pb-4 border-b border-sidebar-border">
@@ -504,6 +742,7 @@ function Dashboard({
                 size="icon"
                 className="rounded-xl"
                 onClick={() => setMobileMenu(false)}
+                aria-label="Close menu"
               >
                 <X className="size-5" />
               </Button>
@@ -537,45 +776,78 @@ function Dashboard({
       {/* Main Content Area */}
       <div
         className={cn(
-          "transition-all duration-300 ease-in-out",
+          "w-full min-w-0 transition-all duration-300 ease-in-out",
           collapsed ? "lg:pl-[84px]" : "lg:pl-[264px]",
         )}
       >
-        <header className="sticky top-0 z-30 flex h-[76px] items-center justify-between border-b border-border bg-background/80 px-4 backdrop-blur-xl sm:px-7 lg:px-10">
-          <div className="flex items-center gap-3">
+        <header className="sticky top-0 z-30 flex h-16 sm:h-[72px] lg:h-[76px] w-full max-w-full items-center justify-between border-b border-border bg-background/85 px-3 sm:px-6 lg:px-10 backdrop-blur-xl">
+          {/* Left Side: Mobile (<768px) shows [☰] [LOGO] only. Tablet/Desktop (>=768px) shows [LOGO] + branding text */}
+          <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+            {/* Hamburger menu: visible on mobile and tablet (< 1024px) */}
             <Button
               variant="ghost"
               size="icon"
-              className="size-10 rounded-xl lg:hidden"
+              className="size-9 sm:size-10 rounded-xl lg:hidden shrink-0"
               onClick={() => setMobileMenu(true)}
               aria-label="Open menu"
             >
               <Menu className="size-5" />
             </Button>
-            <div>
-              <h1 className="text-lg font-bold tracking-tight text-foreground sm:text-xl">
-                {title}
-              </h1>
-              <p className="hidden text-xs text-muted-foreground sm:block">
-                Here’s what’s happening with your coaching workspace today.
-              </p>
-            </div>
-          </div>
 
-          <div className="flex items-center gap-1.5 sm:gap-2.5">
-            <div className="relative hidden md:block">
-              <Search className="absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-              <Input
-                className="input-glow h-10 w-48 rounded-xl bg-card/60 pl-9 pr-3 text-xs shadow-none backdrop-blur-sm lg:w-60"
-                placeholder="Search tests, students, questions..."
+            {/* Official Coaching App Logo: 48-56px width, aspect ratio kept, clean card */}
+            <div className="flex items-center justify-center rounded-xl bg-white p-1 sm:p-1.5 shadow-sm ring-1 ring-border/40 shrink-0">
+              <img
+                src="/assets/coaching-app-logo.png"
+                alt="Coaching App Logo"
+                className="h-8 w-auto max-w-[50px] object-contain sm:h-10 sm:max-w-[56px] rounded-lg"
+                referrerPolicy="no-referrer"
               />
             </div>
 
+            {/* Branding Text & Badge: HIDDEN on mobile (< 768px), SHOWN on tablet/desktop (>= 768px) */}
+            {active === "Dashboard" ? (
+              <div className="hidden md:flex flex-col min-w-0">
+                <div className="flex items-center gap-1.5 sm:gap-2">
+                  <span className="text-base sm:text-lg font-bold leading-tight tracking-tight text-foreground truncate">
+                    Coaching<span className="text-primary">App</span>
+                  </span>
+                  <span className="rounded-md bg-primary/10 px-2 py-0.5 text-[10px] font-bold text-primary uppercase tracking-wide shrink-0">
+                    {role === "admin" ? "Admin Portal" : "Student Portal"}
+                  </span>
+                </div>
+                <span className="text-[10px] sm:text-xs text-muted-foreground font-medium mt-0.5 hidden lg:block truncate">
+                  Official Online Test & Coaching Platform
+                </span>
+              </div>
+            ) : (
+              <div className="hidden md:block min-w-0">
+                <h1 className="text-base sm:text-lg font-bold tracking-tight text-foreground truncate">
+                  {active}
+                </h1>
+                <p className="hidden lg:block text-[10px] sm:text-xs text-muted-foreground">
+                  Coaching App · {role === "admin" ? "Institute Management" : "Student Learning"}
+                </p>
+              </div>
+            )}
+          </div>
+
+          {/* Right Side: Mobile (<768px) shows only [🔔] and [👤] avatar. Desktop (>=1024px) retains full controls */}
+          <div className="flex items-center gap-1.5 sm:gap-2.5 shrink-0">
+            {/* Desktop & Tablet Search (>= 768px): hidden on mobile (< 768px) */}
+            <div className="relative hidden md:block">
+              <Search className="absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                className="input-glow h-9 sm:h-10 w-44 rounded-xl bg-card/60 pl-9 pr-3 text-xs shadow-none backdrop-blur-sm lg:w-56"
+                placeholder="Search tests, students..."
+              />
+            </div>
+
+            {/* Refresh button: hidden on mobile (< 768px) */}
             <Button
               variant="ghost"
               size="icon"
               className={cn(
-                "size-10 rounded-xl text-muted-foreground hover:text-foreground",
+                "hidden md:inline-flex size-9 sm:size-10 rounded-xl text-muted-foreground hover:text-foreground",
                 isRefreshing && "animate-spin",
               )}
               onClick={handleRefresh}
@@ -584,24 +856,37 @@ function Dashboard({
               <RefreshCw className="size-4" />
             </Button>
 
-            <ThemeToggle theme={theme} setTheme={setTheme} />
+            {/* Theme toggle: hidden on mobile (< 768px) */}
+            <div className="hidden md:block">
+              <ThemeToggle theme={theme} setTheme={setTheme} />
+            </div>
 
+            {/* Notification button: visible across mobile, tablet, and desktop */}
             <Button
               variant="ghost"
               size="icon"
-              className="relative size-10 rounded-xl text-muted-foreground hover:text-foreground"
+              className="relative size-9 sm:size-10 rounded-xl text-muted-foreground hover:text-foreground shrink-0"
               aria-label="Notifications"
             >
               <Bell className="size-4" />
-              <span className="absolute right-2.5 top-2.5 size-2 rounded-full bg-brand-orange ring-2 ring-background" />
+              <span className="absolute right-2 top-2 size-2 rounded-full bg-brand-orange ring-2 ring-background" />
             </Button>
 
-            <div className="ml-1 flex items-center gap-2 rounded-xl bg-primary/10 p-1.5 pl-2.5 text-xs font-semibold text-primary">
-              <span className="hidden sm:inline font-medium text-foreground">
-                {role === "admin" ? "Admin Amar" : "Student Aarav"}
+            {/* Mobile User Profile Avatar (< 768px): clean [👤] avatar, no text */}
+            <div
+              className="md:hidden grid size-9 place-items-center rounded-xl bg-primary text-primary-foreground shadow-sm shrink-0"
+              aria-label={role === "admin" ? "Administrator" : "Student"}
+            >
+              <User className="size-4" />
+            </div>
+
+            {/* Desktop & Tablet Profile Pill (>= 768px): full design intact */}
+            <div className="hidden md:flex ml-0.5 items-center gap-2 rounded-xl bg-primary/10 p-1 pl-2 sm:p-1.5 sm:pl-2.5 text-xs font-semibold text-primary shrink-0">
+              <span className="font-medium text-foreground">
+                {role === "admin" ? "Administrator" : "Student"}
               </span>
-              <div className="grid size-7 place-items-center rounded-lg bg-primary text-[11px] font-bold text-primary-foreground shadow-sm">
-                {role === "admin" ? "AK" : "AS"}
+              <div className="grid size-7 place-items-center rounded-lg bg-primary text-[10px] font-bold text-primary-foreground shadow-sm">
+                {role === "admin" ? "ADM" : "STU"}
               </div>
             </div>
           </div>
@@ -609,29 +894,37 @@ function Dashboard({
 
         <main
           key={refreshKey}
-          className="mx-auto max-w-[1500px] px-4 py-6 pb-24 sm:px-7 lg:px-10 lg:py-8"
+          className="mx-auto max-w-[1500px] px-3 sm:px-6 lg:px-10 py-5 sm:py-6 pb-24 sm:pb-28 lg:pb-10"
         >
           <SectionRouter active={active} role={role} onStartTest={() => setActive("Tests")} />
         </main>
       </div>
 
       {/* Mobile Bottom Navigation Bar */}
-      <nav className="fixed inset-x-3 bottom-3 z-40 flex h-16 items-center justify-around rounded-[20px] border border-border bg-card/90 px-2 shadow-card backdrop-blur-2xl lg:hidden">
+      <nav className="fixed inset-x-3 bottom-3 z-40 flex h-16 items-center justify-around rounded-[20px] border border-border bg-card/90 px-1 shadow-card backdrop-blur-2xl lg:hidden">
         {nav.slice(0, 4).map(([label, Icon]) => (
           <button
             key={label}
             className={cn(
-              "flex h-12 min-w-14 flex-col items-center justify-center gap-1 rounded-xl text-[10px] font-medium transition-all duration-200",
+              "flex h-12 flex-1 min-w-0 max-w-[72px] flex-col items-center justify-center gap-1 rounded-xl text-[10px] font-medium transition-all duration-200",
               active === label
                 ? "bg-primary/15 text-primary font-semibold shadow-sm"
-                : "text-muted-foreground",
+                : "text-muted-foreground hover:text-foreground",
             )}
             onClick={() => setActive(label)}
           >
             <Icon className="size-4" />
-            {label.replace("My ", "")}
+            <span className="truncate max-w-[56px]">{label.replace("My ", "")}</span>
           </button>
         ))}
+        <button
+          type="button"
+          className="flex h-12 flex-1 min-w-0 max-w-[72px] flex-col items-center justify-center gap-1 rounded-xl text-[10px] font-medium text-muted-foreground transition-all duration-200 hover:text-foreground"
+          onClick={() => setMobileMenu(true)}
+        >
+          <Menu className="size-4" />
+          <span>More</span>
+        </button>
       </nav>
     </div>
   );
@@ -718,13 +1011,15 @@ function AdminDashboard() {
 
   return (
     <div className="animate-rise space-y-6">
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <DashboardBrandBanner role="admin" />
+
+      <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 xl:grid-cols-4">
         {cards.map(([label, value, note, Icon, color]) => (
           <StatCard key={label} label={label} value={value} note={note} Icon={Icon} color={color} />
         ))}
       </div>
 
-      <div className="grid gap-6 xl:grid-cols-[1.65fr_1fr]">
+      <div className="grid gap-4 sm:gap-6 xl:grid-cols-[1.65fr_1fr]">
         <Panel
           title="Test Performance"
           subtitle="Average institute score across all subjects"
@@ -737,7 +1032,7 @@ function AdminDashboard() {
         </Panel>
       </div>
 
-      <div className="grid gap-6 xl:grid-cols-[1fr_1.65fr]">
+      <div className="grid gap-4 sm:gap-6 xl:grid-cols-[1fr_1.65fr]">
         <Panel title="Upcoming Tests" subtitle="Scheduled for this week across classes">
           <UpcomingTests />
         </Panel>
@@ -758,28 +1053,9 @@ function StudentDashboard() {
 
   return (
     <div className="animate-rise space-y-6">
-      <section className="student-banner glass-card relative overflow-hidden bg-gradient-to-r from-blue-700 via-blue-600 to-indigo-700 p-6 text-white shadow-brand sm:p-8">
-        <div className="relative z-10 max-w-xl">
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-white/15 px-3 py-1 text-xs font-semibold text-white backdrop-blur-md">
-            <Trophy className="size-3.5" /> Your Weekly Target
-          </span>
-          <h2 className="mt-3 text-2xl font-bold sm:text-3xl">
-            You’re making great progress, Aarav!
-          </h2>
-          <p className="mt-2 text-sm text-blue-100/90">
-            Complete two more mock tests to qualify for the JEE Advanced batch ranking.
-          </p>
-          <div className="mt-6 flex items-center gap-4">
-            <div className="w-full max-w-sm">
-              <AnimatedProgressBar value={72} className="bg-white/20" />
-            </div>
-            <span className="text-sm font-bold tabular-nums">72%</span>
-          </div>
-        </div>
-        <Trophy className="absolute -bottom-8 right-6 size-44 text-white opacity-10 sm:right-12" />
-      </section>
+      <DashboardBrandBanner role="student" onStartTest={() => setTestOpen(true)} />
 
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard
           label="My Tests"
           value="12"
@@ -1237,6 +1513,9 @@ function TestFlow({ onExit }: { onExit: () => void }) {
           >
             <ArrowLeft className="size-5" />
           </Button>
+          <div className="hidden sm:block">
+            <CoachingLogo compact className="p-1" />
+          </div>
           <div>
             <h2 className="text-base font-bold text-foreground sm:text-lg">
               Full Syllabus Mock Test · JEE Standard
@@ -1493,17 +1772,27 @@ function TestResults({
 
   return (
     <div className="animate-rise space-y-6">
-      <section className="glass-card relative overflow-hidden bg-gradient-to-r from-blue-700 via-blue-600 to-indigo-700 p-6 text-white shadow-brand sm:p-8">
-        <div className="relative z-10 max-w-xl">
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-white/15 px-3 py-1 text-xs font-semibold backdrop-blur-md">
-            <CheckCircle2 className="size-4" /> Attempt Evaluated
-          </span>
-          <h2 className="mt-4 text-3xl font-bold sm:text-4xl">Great effort, Aarav!</h2>
-          <p className="mt-2 text-sm text-blue-100">
-            Your results are synchronized with the national coaching percentile rank.
-          </p>
+      <section className="glass-card relative overflow-hidden bg-gradient-to-r from-blue-700 via-blue-600 to-indigo-700 p-5 sm:p-7 text-white shadow-brand">
+        <div className="relative z-10 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div className="max-w-xl">
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-white/15 px-3 py-1 text-xs font-semibold backdrop-blur-md">
+              <CheckCircle2 className="size-4" /> Attempt Evaluated
+            </span>
+            <h2 className="mt-3 text-2xl font-bold sm:text-3xl">Exam Evaluation & Score Report</h2>
+            <p className="mt-1 text-xs sm:text-sm text-blue-100">
+              Your results are synchronized with the national coaching percentile rank.
+            </p>
+          </div>
+          <div className="rounded-2xl bg-white p-2 sm:p-2.5 shadow-lg shrink-0 self-start sm:self-center">
+            <img
+              src="/assets/coaching-app-logo.png"
+              alt="Coaching App Logo"
+              className="size-12 sm:size-14 object-contain"
+              referrerPolicy="no-referrer"
+            />
+          </div>
         </div>
-        <Trophy className="absolute -bottom-8 right-6 size-44 text-white opacity-10" />
+        <Trophy className="absolute -bottom-8 right-6 size-44 text-white opacity-10 pointer-events-none" />
       </section>
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
