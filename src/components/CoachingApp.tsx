@@ -44,31 +44,59 @@ import {
   RefreshCw,
   BarChart3,
   HelpCircle,
+  Building2,
+  Briefcase,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
+import { ManagementProvider, useManagement } from "@/lib/ManagementContext";
+import { InstitutesView } from "@/components/management/InstitutesView";
+import { EmployeesView } from "@/components/management/EmployeesView";
+import { CoursesView } from "@/components/management/CoursesView";
+import { StudentsManagementView } from "@/components/management/StudentsManagementView";
+import { StudentCoursesView } from "@/components/management/StudentCoursesView";
 
-type Role = "admin" | "student";
-type Theme = "light" | "dark";
+export type Role = "admin" | "institute_admin" | "teacher" | "student";
+export type Theme = "light" | "dark";
 type IconType = typeof Gauge;
 
 const adminNav: Array<[string, IconType]> = [
   ["Dashboard", LayoutDashboard],
+  ["Institutes", Building2],
+  ["Employees", Briefcase],
+  ["Courses", BookOpen],
   ["Students", Users],
   ["Tests", ClipboardCheck],
-  ["Question Bank", BookOpen],
   ["Results", Trophy],
-  ["Reports", FileBarChart],
+  ["Settings", Settings],
+];
+
+const instituteAdminNav: Array<[string, IconType]> = [
+  ["Dashboard", LayoutDashboard],
+  ["Courses", BookOpen],
+  ["Students", Users],
+  ["Employees", Briefcase],
+  ["Tests", ClipboardCheck],
+  ["Results", Trophy],
+  ["Settings", Settings],
+];
+
+const teacherNav: Array<[string, IconType]> = [
+  ["Dashboard", LayoutDashboard],
+  ["Courses", BookOpen],
+  ["Students", Users],
+  ["Tests", ClipboardCheck],
+  ["Results", Trophy],
   ["Settings", Settings],
 ];
 
 const studentNav: Array<[string, IconType]> = [
   ["Dashboard", LayoutDashboard],
+  ["My Courses", BookOpen],
   ["My Tests", ClipboardCheck],
   ["My Results", Trophy],
-  ["Test Series", FileText],
-  ["Study Material", BookOpen],
+  ["Study Material", FileText],
   ["Settings", Settings],
 ];
 
@@ -119,8 +147,9 @@ export function CoachingLogo({
         </div>
         <div className="flex flex-col">
           <div className="flex items-center gap-1.5 sm:gap-2">
-            <span className="text-base font-bold leading-tight tracking-tight text-foreground sm:text-lg">
-              Coaching<span className="text-primary">App</span>
+            <span className="text-base font-bold leading-tight tracking-tight sm:text-lg">
+              <span className="text-blue-600 dark:text-blue-400">Coaching</span>
+              <span className="text-[#f97316] font-extrabold">App</span>
             </span>
           </div>
           <span className="text-[9px] font-semibold tracking-wider text-muted-foreground uppercase hidden xs:block sm:text-[10px]">
@@ -153,17 +182,28 @@ export function CoachingLogo({
     return (
       <div
         className={cn(
-          "flex w-full items-center justify-center rounded-2xl bg-white p-2.5 sm:p-3 shadow-sm ring-1 ring-border/40 transition-transform duration-200 hover:scale-[1.02]",
+          "flex w-full items-center gap-3 rounded-2xl p-1 transition-transform duration-200",
           className,
         )}
         aria-label="Coaching App Logo"
       >
-        <img
-          src="/assets/coaching-app-logo.png"
-          alt="Coaching App Logo"
-          className="h-16 w-auto max-w-[180px] object-contain sm:h-20 sm:max-w-[200px]"
-          referrerPolicy="no-referrer"
-        />
+        <div className="flex items-center justify-center rounded-2xl bg-white p-2 shadow-sm ring-1 ring-border/40 shrink-0">
+          <img
+            src="/assets/coaching-app-logo.png"
+            alt="Coaching App Logo"
+            className="h-9 w-auto max-w-[48px] object-contain rounded-lg"
+            referrerPolicy="no-referrer"
+          />
+        </div>
+        <div className="flex flex-col min-w-0">
+          <span className="text-lg font-bold leading-tight tracking-tight">
+            <span className="text-blue-600 dark:text-blue-400">Coaching</span>
+            <span className="text-[#f97316] font-extrabold">App</span>
+          </span>
+          <span className="text-[9px] font-semibold tracking-wider text-muted-foreground uppercase truncate">
+            Online Test Platform
+          </span>
+        </div>
       </div>
     );
   }
@@ -185,8 +225,9 @@ export function CoachingLogo({
         />
       </div>
       <div className="flex flex-col">
-        <span className="text-base font-bold leading-tight tracking-tight text-foreground sm:text-[19px]">
-          Coaching<span className="text-primary">App</span>
+        <span className="text-base font-bold leading-tight tracking-tight sm:text-[19px]">
+          <span className="text-blue-600 dark:text-blue-400">Coaching</span>
+          <span className="text-[#f97316] font-extrabold">App</span>
         </span>
         <span className="text-[8px] font-semibold tracking-wider text-muted-foreground uppercase sm:text-[9px]">
           Online Test Platform
@@ -218,19 +259,91 @@ export function DashboardBrandBanner({
             </div>
             <div className="min-w-0">
               <div className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-2.5 py-0.5 text-[11px] font-semibold text-primary mb-1">
-                <Sparkles className="size-3" /> Official Institute Portal
+                <Sparkles className="size-3" /> Master Admin Portal
               </div>
               <h2 className="text-lg sm:text-2xl font-bold tracking-tight text-foreground truncate">
-                Coaching App Administration
+                <span className="text-blue-600 dark:text-blue-400">Coaching</span>
+                <span className="text-[#f97316] font-extrabold">App</span> Master Administration
               </h2>
               <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">
-                Centralized institute management, live test monitoring & student analytics
+                Centralized network management: Institutes, Faculty Employees, Courses & Students
               </p>
             </div>
           </div>
           <div className="flex items-center gap-2 self-start sm:self-center shrink-0">
             <span className="inline-flex items-center gap-1.5 rounded-xl bg-card border border-border/80 px-3 py-1.5 text-xs font-medium text-foreground shadow-xs">
-              <CheckCircle2 className="size-3.5 text-emerald-500" /> System Active
+              <CheckCircle2 className="size-3.5 text-emerald-500" /> Multi-Tenant Active
+            </span>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  if (role === "institute_admin") {
+    return (
+      <section className="glass-card relative overflow-hidden rounded-[20px] p-4 sm:p-6 bg-gradient-to-r from-card via-card to-amber-500/5 border border-border/80 shadow-card">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="flex items-center gap-3.5 sm:gap-4 min-w-0">
+            <div className="rounded-2xl bg-white p-2 sm:p-2.5 shadow-md ring-1 ring-border/50 shrink-0">
+              <img
+                src="/assets/coaching-app-logo.png"
+                alt="Coaching App Logo"
+                className="h-12 w-12 sm:h-16 sm:w-16 object-contain"
+                referrerPolicy="no-referrer"
+              />
+            </div>
+            <div className="min-w-0">
+              <div className="inline-flex items-center gap-1.5 rounded-full bg-amber-500/15 px-2.5 py-0.5 text-[11px] font-semibold text-amber-600 dark:text-amber-400 mb-1">
+                <Building2 className="size-3" /> Apex IIT-JEE Academy · Institute Portal
+              </div>
+              <h2 className="text-lg sm:text-2xl font-bold tracking-tight text-foreground truncate">
+                Institute Management Workspace
+              </h2>
+              <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">
+                Branch curriculum, batch enrollments, teacher assignments & tests (Isolated data
+                separation)
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2 self-start sm:self-center shrink-0">
+            <span className="inline-flex items-center gap-1.5 rounded-xl bg-card border border-border/80 px-3 py-1.5 text-xs font-medium text-foreground shadow-xs">
+              <CheckCircle2 className="size-3.5 text-emerald-500" /> Campus Active
+            </span>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  if (role === "teacher") {
+    return (
+      <section className="glass-card relative overflow-hidden rounded-[20px] p-4 sm:p-6 bg-gradient-to-r from-card via-card to-blue-500/5 border border-border/80 shadow-card">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="flex items-center gap-3.5 sm:gap-4 min-w-0">
+            <div className="rounded-2xl bg-white p-2 sm:p-2.5 shadow-md ring-1 ring-border/50 shrink-0">
+              <img
+                src="/assets/coaching-app-logo.png"
+                alt="Coaching App Logo"
+                className="h-12 w-12 sm:h-16 sm:w-16 object-contain"
+                referrerPolicy="no-referrer"
+              />
+            </div>
+            <div className="min-w-0">
+              <div className="inline-flex items-center gap-1.5 rounded-full bg-blue-500/15 px-2.5 py-0.5 text-[11px] font-semibold text-blue-600 dark:text-blue-400 mb-1">
+                <GraduationCap className="size-3" /> Faculty Portal · Dr. Ananya Sen
+              </div>
+              <h2 className="text-lg sm:text-2xl font-bold tracking-tight text-foreground truncate">
+                Educator & Class Batches Workspace
+              </h2>
+              <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">
+                Review assigned course curricula, classroom students, tests and marks evaluations
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2 self-start sm:self-center shrink-0">
+            <span className="inline-flex items-center gap-1.5 rounded-xl bg-card border border-border/80 px-3 py-1.5 text-xs font-medium text-foreground shadow-xs">
+              <CheckCircle2 className="size-3.5 text-emerald-500" /> Faculty Logged In
             </span>
           </div>
         </div>
@@ -250,39 +363,29 @@ export function DashboardBrandBanner({
               referrerPolicy="no-referrer"
             />
           </div>
-          <div className="max-w-xl min-w-0">
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-white/15 px-3 py-1 text-xs font-semibold text-white backdrop-blur-md">
-              <Trophy className="size-3.5" /> Official Student Portal
-            </span>
-            <h2 className="mt-2 text-xl font-bold sm:text-3xl leading-snug">
-              Online Test & Coaching Workspace
-            </h2>
-            <p className="mt-1 text-xs sm:text-sm text-blue-100/90 leading-relaxed">
-              Take timed mock exams, track subject accuracy, and review comprehensive test
-              performance.
-            </p>
-            <div className="mt-3.5 flex items-center gap-3">
-              <div className="w-full max-w-xs">
-                <AnimatedProgressBar value={72} className="bg-white/20" />
-              </div>
-              <span className="text-xs sm:text-sm font-bold tabular-nums shrink-0">
-                72% Completed
-              </span>
+          <div className="min-w-0">
+            <div className="inline-flex items-center gap-1.5 rounded-full bg-white/15 px-2.5 py-0.5 text-[11px] font-semibold backdrop-blur-md mb-1.5">
+              <Sparkles className="size-3 text-amber-300" /> Student Learning Portal
             </div>
+            <h2 className="text-xl sm:text-2xl font-bold tracking-tight">
+              Welcome back, Rahul Kumar
+            </h2>
+            <p className="text-xs sm:text-sm text-blue-100 mt-1 max-w-xl">
+              Enrolled in: <strong className="text-white">Class 12 Advanced Physics</strong> at{" "}
+              <strong className="text-white">Apex IIT-JEE Academy</strong>.
+            </p>
           </div>
         </div>
-        <div className="flex sm:flex-col items-center sm:items-end gap-2.5 self-start md:self-center shrink-0">
-          {onStartTest && (
-            <Button
-              onClick={onStartTest}
-              className="w-full sm:w-auto rounded-xl bg-white text-blue-700 font-semibold shadow-md hover:bg-blue-50 transition-transform active:scale-95"
-            >
-              <ClipboardCheck className="size-4 mr-2" /> Start Practice Test
-            </Button>
-          )}
+        <div className="flex items-center gap-3 shrink-0">
+          <Button
+            type="button"
+            className="h-11 rounded-xl bg-white text-blue-700 hover:bg-blue-50 px-5 text-xs font-bold shadow-lg"
+            onClick={onStartTest}
+          >
+            Start Practice Exam <ArrowRight className="size-3.5 ml-1.5" />
+          </Button>
         </div>
       </div>
-      <Trophy className="absolute -bottom-8 right-6 size-44 text-white opacity-10 pointer-events-none" />
     </section>
   );
 }
@@ -373,15 +476,25 @@ function AnimatedProgressBar({ value, className }: { value: number; className?: 
 }
 
 export default function CoachingApp() {
+  return (
+    <ManagementProvider>
+      <CoachingAppInner />
+    </ManagementProvider>
+  );
+}
+
+function CoachingAppInner() {
   const [role, setRole] = useState<Role>("admin");
   const [session, setSession] = useState<Role | null>(null);
   const [theme, setTheme] = useState<Theme>("dark");
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
-    const storedRole = window.localStorage.getItem("coachingapp-session");
+    const storedRole = window.localStorage.getItem("coachingapp-session") as Role | null;
     const storedTheme = window.localStorage.getItem("coachingapp-theme") as Theme | null;
-    if (storedRole === "admin" || storedRole === "student") setSession(storedRole);
+    if (storedRole && ["admin", "institute_admin", "teacher", "student"].includes(storedRole)) {
+      setSession(storedRole);
+    }
     if (storedTheme === "light" || storedTheme === "dark") setTheme(storedTheme);
     setReady(true);
   }, []);
@@ -428,6 +541,13 @@ export default function CoachingApp() {
   );
 }
 
+const LOGIN_ROLES: Array<{ id: Role; label: string; icon: typeof Gauge }> = [
+  { id: "admin", label: "Super Admin", icon: Gauge },
+  { id: "institute_admin", label: "Institute Admin", icon: Building2 },
+  { id: "teacher", label: "Teacher", icon: GraduationCap },
+  { id: "student", label: "Student", icon: UserRound },
+];
+
 function Login({
   role,
   setRole,
@@ -446,6 +566,20 @@ function Login({
   const submit = (event: FormEvent) => {
     event.preventDefault();
     login();
+  };
+
+  const getEmailPlaceholder = (r: Role) => {
+    if (r === "admin") return "admin@coachingapp.com";
+    if (r === "institute_admin") return "director@apexacademy.edu";
+    if (r === "teacher") return "ananya.sen@apexacademy.edu";
+    return "rahul.kumar@gmail.com";
+  };
+
+  const getRoleName = (r: Role) => {
+    if (r === "admin") return "Super Admin";
+    if (r === "institute_admin") return "Institute Admin";
+    if (r === "teacher") return "Teacher / Faculty";
+    return "Student";
   };
 
   return (
@@ -475,8 +609,8 @@ function Login({
               Everything your coaching institute needs.
             </h1>
             <p className="mt-6 max-w-lg text-base leading-7 text-muted-foreground">
-              Manage students, conduct online tests and turn performance data into better learning
-              outcomes.
+              Manage institutes, courses, faculty and students with complete data isolation and
+              online test administration.
             </p>
             <div className="mt-10 flex gap-8">
               <LoginMetric value="98%" label="Student satisfaction" />
@@ -506,51 +640,47 @@ function Login({
                 Welcome Back
               </p>
               <h2 className="mt-1.5 text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
-                Sign in to Coaching App
+                Sign in to <span className="text-blue-600 dark:text-blue-400">Coaching</span>
+                <span className="text-[#f97316] font-extrabold">App</span>
               </h2>
               <p className="mt-1 text-xs text-muted-foreground sm:text-sm">
-                Enter your details to access your workspace.
+                Select your account role to access your portal.
               </p>
             </div>
 
             <div
-              className="mt-7 grid grid-cols-2 rounded-2xl bg-muted/70 p-1.5"
+              className="mt-6 grid grid-cols-2 gap-1.5 rounded-2xl bg-muted/70 p-1.5"
               aria-label="Choose account role"
             >
-              {(["admin", "student"] as Role[]).map((item) => (
+              {LOGIN_ROLES.map((item) => (
                 <button
-                  key={item}
+                  key={item.id}
                   type="button"
                   className={cn(
-                    "flex h-11 items-center justify-center gap-2 rounded-xl text-xs font-semibold capitalize transition-all duration-200",
-                    role === item
-                      ? "btn-gradient shadow-md"
+                    "flex h-10 items-center justify-center gap-1.5 rounded-xl text-xs font-semibold transition-all duration-200",
+                    role === item.id
+                      ? "btn-gradient shadow-md text-white font-bold"
                       : "text-muted-foreground hover:text-foreground",
                   )}
-                  onClick={() => setRole(item)}
+                  onClick={() => setRole(item.id)}
                 >
-                  {item === "admin" ? (
-                    <Gauge className="size-4" />
-                  ) : (
-                    <GraduationCap className="size-4" />
-                  )}
-                  {item}
+                  <item.icon className="size-3.5 shrink-0" />
+                  <span className="truncate">{item.label}</span>
                 </button>
               ))}
             </div>
 
-            <form className="mt-7 space-y-4" onSubmit={submit}>
+            <form className="mt-6 space-y-4" onSubmit={submit}>
               <label className="block">
                 <span className="mb-2 block text-xs font-semibold text-foreground">
-                  Email or mobile number
+                  Email or employee/student ID
                 </span>
                 <div className="relative">
                   <UserRound className="absolute left-4 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
                   <Input
-                    className="input-glow h-12 rounded-xl bg-card/60 pl-11 shadow-none backdrop-blur-sm"
-                    placeholder={
-                      role === "admin" ? "admin@coachingapp.com" : "student@coachingapp.com"
-                    }
+                    className="input-glow h-12 rounded-xl bg-card/60 pl-11 shadow-none backdrop-blur-sm text-xs"
+                    defaultValue={getEmailPlaceholder(role)}
+                    placeholder={getEmailPlaceholder(role)}
                     required
                   />
                 </div>
@@ -560,8 +690,9 @@ function Login({
                 <span className="mb-2 block text-xs font-semibold text-foreground">Password</span>
                 <div className="relative">
                   <Input
-                    className="input-glow h-12 rounded-xl bg-card/60 pr-12 shadow-none backdrop-blur-sm"
+                    className="input-glow h-12 rounded-xl bg-card/60 pr-12 shadow-none backdrop-blur-sm text-xs"
                     type={showPassword ? "text" : "password"}
+                    defaultValue="demo1234"
                     placeholder="Enter your password"
                     required
                     minLength={4}
@@ -595,19 +726,19 @@ function Login({
 
               {forgot && (
                 <div className="animate-rise rounded-xl border border-primary/20 bg-primary/10 px-4 py-3 text-xs text-foreground">
-                  Demo mode: password recovery will be available when accounts are connected.
+                  Demo mode: password recovery is pre-configured. Use any credentials to sign in.
                 </div>
               )}
 
               <button
                 type="submit"
-                className="btn-gradient flex h-12 w-full items-center justify-center gap-2 rounded-xl text-sm font-semibold"
+                className="btn-gradient flex h-12 w-full items-center justify-center gap-2 rounded-xl text-sm font-semibold shadow-brand"
               >
-                Sign in as {role} <ChevronRight className="size-4" />
+                Sign in as {getRoleName(role)} <ChevronRight className="size-4" />
               </button>
             </form>
-            <p className="mt-6 text-center text-xs leading-5 text-muted-foreground">
-              Demo access · Use any email and password
+            <p className="mt-5 text-center text-xs leading-5 text-muted-foreground">
+              Demo access · Click any role tab above to sign in instantly
             </p>
           </div>
         </section>
@@ -642,7 +773,35 @@ function Dashboard({
   const [refreshKey, setRefreshKey] = useState(0);
   const [isRefreshing, setIsRefreshing] = useState(false);
 
-  const nav = role === "admin" ? adminNav : studentNav;
+  const getNavForRole = (r: Role): Array<[string, IconType]> => {
+    if (r === "admin") return adminNav;
+    if (r === "institute_admin") return instituteAdminNav;
+    if (r === "teacher") return teacherNav;
+    return studentNav;
+  };
+
+  const getRoleLabel = (r: Role) => {
+    if (r === "admin") return "Super Admin";
+    if (r === "institute_admin") return "Institute Admin";
+    if (r === "teacher") return "Senior Faculty";
+    return "Student";
+  };
+
+  const getRoleShort = (r: Role) => {
+    if (r === "admin") return "ADM";
+    if (r === "institute_admin") return "INST";
+    if (r === "teacher") return "TCH";
+    return "STU";
+  };
+
+  const getRolePortalBadge = (r: Role) => {
+    if (r === "admin") return "Admin Portal";
+    if (r === "institute_admin") return "Institute Portal";
+    if (r === "teacher") return "Faculty Portal";
+    return "Student Portal";
+  };
+
+  const nav = getNavForRole(role);
 
   const handleRefresh = () => {
     setIsRefreshing(true);
@@ -682,12 +841,22 @@ function Dashboard({
               <Sparkles className="size-4" />
             </div>
             <p className="text-xs font-semibold">
-              {role === "admin" ? "Grow your institute" : "Keep your streak alive"}
+              {role === "admin"
+                ? "Institute Management"
+                : role === "institute_admin"
+                  ? "Apex Academy Branch"
+                  : role === "teacher"
+                    ? "Classroom Faculty"
+                    : "Keep your streak alive"}
             </p>
             <p className="mt-1 text-[11px] leading-4 text-muted-foreground">
               {role === "admin"
-                ? "Explore smart reports and student test metrics."
-                : "You’ve studied consistently this week!"}
+                ? "Full control over institutes, courses, employees & students."
+                : role === "institute_admin"
+                  ? "Manage branch courses, admissions & assigned faculty."
+                  : role === "teacher"
+                    ? "Access assigned courses, test sets & evaluations."
+                    : "You’ve studied consistently this week!"}
             </p>
           </div>
         )}
@@ -809,10 +978,11 @@ function Dashboard({
               <div className="hidden md:flex flex-col min-w-0">
                 <div className="flex items-center gap-1.5 sm:gap-2">
                   <span className="text-base sm:text-lg font-bold leading-tight tracking-tight text-foreground truncate">
-                    Coaching<span className="text-primary">App</span>
+                    <span className="text-blue-600 dark:text-blue-400">Coaching</span>
+                    <span className="text-[#f97316] font-extrabold">App</span>
                   </span>
                   <span className="rounded-md bg-primary/10 px-2 py-0.5 text-[10px] font-bold text-primary uppercase tracking-wide shrink-0">
-                    {role === "admin" ? "Admin Portal" : "Student Portal"}
+                    {getRolePortalBadge(role)}
                   </span>
                 </div>
                 <span className="text-[10px] sm:text-xs text-muted-foreground font-medium mt-0.5 hidden lg:block truncate">
@@ -825,7 +995,8 @@ function Dashboard({
                   {active}
                 </h1>
                 <p className="hidden lg:block text-[10px] sm:text-xs text-muted-foreground">
-                  Coaching App · {role === "admin" ? "Institute Management" : "Student Learning"}
+                  <span className="text-blue-600 dark:text-blue-400 font-semibold">Coaching</span>
+                  <span className="text-[#f97316] font-bold">App</span> · {getRoleLabel(role)}
                 </p>
               </div>
             )}
@@ -875,18 +1046,16 @@ function Dashboard({
             {/* Mobile User Profile Avatar (< 768px): clean [👤] avatar, no text */}
             <div
               className="md:hidden grid size-9 place-items-center rounded-xl bg-primary text-primary-foreground shadow-sm shrink-0"
-              aria-label={role === "admin" ? "Administrator" : "Student"}
+              aria-label={getRoleLabel(role)}
             >
               <User className="size-4" />
             </div>
 
             {/* Desktop & Tablet Profile Pill (>= 768px): full design intact */}
             <div className="hidden md:flex ml-0.5 items-center gap-2 rounded-xl bg-primary/10 p-1 pl-2 sm:p-1.5 sm:pl-2.5 text-xs font-semibold text-primary shrink-0">
-              <span className="font-medium text-foreground">
-                {role === "admin" ? "Administrator" : "Student"}
-              </span>
+              <span className="font-medium text-foreground">{getRoleLabel(role)}</span>
               <div className="grid size-7 place-items-center rounded-lg bg-primary text-[10px] font-bold text-primary-foreground shadow-sm">
-                {role === "admin" ? "ADM" : "STU"}
+                {getRoleShort(role)}
               </div>
             </div>
           </div>
@@ -972,19 +1141,35 @@ function SectionRouter({
   onStartTest: () => void;
 }) {
   if (active === "Dashboard") {
-    return role === "admin" ? <AdminDashboard /> : <StudentDashboard />;
+    return role === "student" ? <StudentDashboard /> : <AdminDashboard role={role} />;
+  }
+  if (active === "Institutes") {
+    return role === "admin" ? <InstitutesView /> : <AdminDashboard role={role} />;
+  }
+  if (active === "Employees") {
+    const allowedInstId = role === "institute_admin" ? "inst-1" : undefined;
+    return <EmployeesView allowedInstituteId={allowedInstId} />;
+  }
+  if (active === "Courses") {
+    const allowedInstId = role === "institute_admin" ? "inst-1" : undefined;
+    const teacherId = role === "teacher" ? "emp-2" : undefined;
+    return <CoursesView allowedInstituteId={allowedInstId} teacherEmployeeId={teacherId} />;
+  }
+  if (active === "My Courses") {
+    return <StudentCoursesView onStartTest={onStartTest} />;
   }
   if (active === "Students") {
-    return <StudentsView />;
+    const allowedInstId = role === "institute_admin" ? "inst-1" : undefined;
+    return <StudentsManagementView allowedInstituteId={allowedInstId} />;
   }
   if (active === "Tests" || active === "My Tests") {
-    return <TestsView role={role} />;
+    return <TestsView role={role === "student" ? "student" : "admin"} />;
   }
   if (active === "Question Bank") {
     return <QuestionBankView />;
   }
   if (active === "Results" || active === "My Results") {
-    return <ResultsView role={role} />;
+    return <ResultsView role={role === "student" ? "student" : "admin"} />;
   }
   if (active === "Reports") {
     return <ReportsView />;
@@ -996,22 +1181,56 @@ function SectionRouter({
     return <StudyMaterialView />;
   }
   if (active === "Settings") {
-    return <SettingsView role={role} />;
+    return <SettingsView role={role === "student" ? "student" : "admin"} />;
   }
-  return <AdminDashboard />;
+  return role === "student" ? <StudentDashboard /> : <AdminDashboard role={role} />;
 }
 
-function AdminDashboard() {
+function AdminDashboard({ role = "admin" }: { role?: Role }) {
+  const { institutes, employees, courses, students } = useManagement();
+
+  const isInstAdmin = role === "institute_admin";
+  const isTeacher = role === "teacher";
+  const currentInstId = isInstAdmin ? "inst-1" : undefined;
+
+  const relevantStudents = currentInstId
+    ? students.filter((s) => s.instituteId === currentInstId)
+    : students;
+  const relevantCourses = currentInstId
+    ? courses.filter((c) => c.instituteId === currentInstId)
+    : courses;
+  const relevantStaff = currentInstId
+    ? employees.filter((e) => e.instituteId === currentInstId)
+    : employees;
+
   const cards = [
-    ["Total Students", "1,248", "+12.5%", Users, "primary"],
-    ["Total Tests", "86", "+8 this month", FileText, "orange"],
-    ["Completed Tests", "64", "74.4% rate", CheckCircle2, "green"],
-    ["Pending Tests", "22", "4 due this week", CalendarDays, "pink"],
+    [
+      isTeacher ? "My Students" : isInstAdmin ? "Branch Students" : "Total Students",
+      relevantStudents.length.toString(),
+      "+12% this month",
+      Users,
+      "primary",
+    ],
+    [
+      isTeacher ? "Assigned Courses" : "Active Courses",
+      relevantCourses.length.toString(),
+      "Active curriculum",
+      BookOpen,
+      "orange",
+    ],
+    [
+      isInstAdmin || isTeacher ? "Faculty & Staff" : "Network Institutes",
+      isInstAdmin || isTeacher ? relevantStaff.length.toString() : institutes.length.toString(),
+      isInstAdmin || isTeacher ? "Active personnel" : "Affiliated branches",
+      isInstAdmin || isTeacher ? Briefcase : Building2,
+      "green",
+    ],
+    ["Active Tests", "86", "Live test series", ClipboardCheck, "pink"],
   ] as const;
 
   return (
     <div className="animate-rise space-y-6">
-      <DashboardBrandBanner role="admin" />
+      <DashboardBrandBanner role={role} />
 
       <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 xl:grid-cols-4">
         {cards.map(([label, value, note, Icon, color]) => (
