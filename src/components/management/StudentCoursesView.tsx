@@ -10,22 +10,33 @@ import {
   Sparkles,
   FileText,
   Search,
+  IndianRupee,
+  Eye,
+  X,
+  CreditCard,
 } from "lucide-react";
 import { useManagement } from "@/lib/ManagementContext";
+import { type Course } from "@/lib/managementData";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 
 export function StudentCoursesView({ onStartTest }: { onStartTest?: () => void }) {
-  const { courses, institutes, employees, students } = useManagement();
+  const { courses, institutes, employees, currentStudent } = useManagement();
   const [search, setSearch] = useState("");
+  const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
+  const [detailsModalOpen, setDetailsModalOpen] = useState(false);
 
-  // Current logged in demo student is Rahul Kumar (stu-1) or first student
-  const currentStudent = students[0];
+  // Current logged in demo student enrolled course
   const enrolledCourse = courses.find((c) => c.id === currentStudent?.courseId) || courses[0];
   const institute = institutes.find((i) => i.id === enrolledCourse?.instituteId);
   const teacher = employees.find((e) => e.id === enrolledCourse?.teacherId);
 
   const otherCourses = courses.filter((c) => c.id !== enrolledCourse?.id);
+
+  const handleOpenCourseDetails = (crs: Course) => {
+    setSelectedCourse(crs);
+    setDetailsModalOpen(true);
+  };
 
   return (
     <div className="animate-rise space-y-6">
@@ -189,12 +200,121 @@ export function StudentCoursesView({ onStartTest }: { onStartTest?: () => void }
                       </span>
                       <span className="text-emerald-500 font-semibold">{crs.status}</span>
                     </div>
+
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleOpenCourseDetails(crs)}
+                      className="w-full h-8 text-xs font-semibold rounded-lg mt-2 gap-1.5"
+                    >
+                      <Eye className="size-3.5" /> View Course Syllabus & Details
+                    </Button>
                   </div>
                 </div>
               );
             })}
         </div>
       </div>
+
+      {/* Course Details Modal */}
+      {detailsModalOpen && selectedCourse && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-xs">
+          <div className="glass-card w-full max-w-lg rounded-2xl p-6 shadow-2xl border border-border/80 animate-rise bg-card max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between pb-3 border-b border-border/60">
+              <div className="flex items-center gap-2">
+                <BookOpen className="size-5 text-primary" />
+                <h3 className="text-sm font-bold text-foreground">Course Overview & Syllabus</h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setDetailsModalOpen(false)}
+                className="rounded-lg p-1.5 text-muted-foreground hover:bg-muted hover:text-foreground"
+              >
+                <X className="size-4" />
+              </button>
+            </div>
+
+            <div className="pt-4 space-y-4 text-xs">
+              <div className="flex items-center justify-between flex-wrap gap-2">
+                <span className="font-mono text-xs font-bold bg-primary/10 text-primary px-2.5 py-0.5 rounded-full">
+                  {selectedCourse.code}
+                </span>
+                <span className="font-bold text-sm text-foreground">{selectedCourse.fee}</span>
+              </div>
+
+              <div>
+                <h4 className="text-base font-bold text-foreground mb-1">{selectedCourse.name}</h4>
+                <p className="text-muted-foreground leading-relaxed">
+                  {selectedCourse.description}
+                </p>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3 bg-muted/40 p-3 rounded-xl">
+                <div>
+                  <span className="text-[10px] text-muted-foreground uppercase font-bold block">
+                    Duration
+                  </span>
+                  <span className="font-semibold text-foreground">{selectedCourse.duration}</span>
+                </div>
+                <div>
+                  <span className="text-[10px] text-muted-foreground uppercase font-bold block">
+                    Campus Institute
+                  </span>
+                  <span className="font-semibold text-foreground">
+                    {institutes.find((i) => i.id === selectedCourse.instituteId)?.name}
+                  </span>
+                </div>
+                <div>
+                  <span className="text-[10px] text-muted-foreground uppercase font-bold block">
+                    Start Date
+                  </span>
+                  <span className="font-semibold text-foreground">{selectedCourse.startDate}</span>
+                </div>
+                <div>
+                  <span className="text-[10px] text-muted-foreground uppercase font-bold block">
+                    End Date
+                  </span>
+                  <span className="font-semibold text-foreground">{selectedCourse.endDate}</span>
+                </div>
+              </div>
+
+              <div className="p-3 rounded-xl border border-border/60 bg-card space-y-1.5">
+                <span className="font-bold text-foreground block">Curriculum Highlights</span>
+                <ul className="list-disc pl-4 space-y-1 text-muted-foreground text-[11px]">
+                  <li>Weekly conceptual lectures with live problem solving</li>
+                  <li>Full syllabus chapter-wise and mock tests</li>
+                  <li>Detailed performance analysis and test rankings</li>
+                  <li>Exclusive study notes, DPPs, and formula handbooks</li>
+                </ul>
+              </div>
+
+              <div className="flex justify-end gap-2 pt-2 border-t border-border/60">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setDetailsModalOpen(false)}
+                  className="h-9 rounded-xl text-xs"
+                >
+                  Close
+                </Button>
+                {onStartTest && (
+                  <Button
+                    type="button"
+                    onClick={() => {
+                      setDetailsModalOpen(false);
+                      onStartTest();
+                    }}
+                    className="btn-gradient h-9 rounded-xl text-xs font-semibold px-4 shadow-brand"
+                  >
+                    Take Practice Test
+                  </Button>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -46,6 +46,7 @@ import {
   HelpCircle,
   Building2,
   Briefcase,
+  CreditCard,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -56,6 +57,9 @@ import { EmployeesView } from "@/components/management/EmployeesView";
 import { CoursesView } from "@/components/management/CoursesView";
 import { StudentsManagementView } from "@/components/management/StudentsManagementView";
 import { StudentCoursesView } from "@/components/management/StudentCoursesView";
+import { InstituteProfileView } from "@/components/management/InstituteProfileView";
+import { StudentPaymentsView } from "@/components/management/StudentPaymentsView";
+import { StudentProfileView } from "@/components/management/StudentProfileView";
 
 export type Role = "admin" | "institute_admin" | "teacher" | "student";
 export type Theme = "light" | "dark";
@@ -74,6 +78,7 @@ const adminNav: Array<[string, IconType]> = [
 
 const instituteAdminNav: Array<[string, IconType]> = [
   ["Dashboard", LayoutDashboard],
+  ["Institute Profile", Building2],
   ["Courses", BookOpen],
   ["Students", Users],
   ["Employees", Briefcase],
@@ -94,6 +99,8 @@ const teacherNav: Array<[string, IconType]> = [
 const studentNav: Array<[string, IconType]> = [
   ["Dashboard", LayoutDashboard],
   ["My Courses", BookOpen],
+  ["Fee & Payments", CreditCard],
+  ["My Profile", UserRound],
   ["My Tests", ClipboardCheck],
   ["My Results", Trophy],
   ["Study Material", FileText],
@@ -240,10 +247,17 @@ export function CoachingLogo({
 export function DashboardBrandBanner({
   role,
   onStartTest,
+  onNavigate,
 }: {
   role: Role;
   onStartTest?: () => void;
+  onNavigate?: (tab: string) => void;
 }) {
+  const { currentStudent, courses, institutes } = useManagement();
+  const studentName = currentStudent?.fullName || "Rahul Kumar";
+  const enrolledCourse = courses.find((c) => c.id === currentStudent?.courseId) || courses[0];
+  const institute = institutes.find((i) => i.id === enrolledCourse?.instituteId) || institutes[0];
+
   if (role === "admin") {
     return (
       <section className="glass-card relative overflow-hidden rounded-[20px] p-4 sm:p-6 bg-gradient-to-r from-card via-card to-primary/5 border border-border/80 shadow-card">
@@ -295,7 +309,8 @@ export function DashboardBrandBanner({
             </div>
             <div className="min-w-0">
               <div className="inline-flex items-center gap-1.5 rounded-full bg-amber-500/15 px-2.5 py-0.5 text-[11px] font-semibold text-amber-600 dark:text-amber-400 mb-1">
-                <Building2 className="size-3" /> Apex IIT-JEE Academy · Institute Portal
+                <Building2 className="size-3" /> {institute?.name || "Apex IIT-JEE Academy"} ·
+                Institute Portal
               </div>
               <h2 className="text-lg sm:text-2xl font-bold tracking-tight text-foreground truncate">
                 Institute Management Workspace
@@ -307,6 +322,17 @@ export function DashboardBrandBanner({
             </div>
           </div>
           <div className="flex items-center gap-2 self-start sm:self-center shrink-0">
+            {onNavigate && (
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => onNavigate("Institute Profile")}
+                className="h-9 rounded-xl text-xs font-semibold gap-1.5 shadow-xs"
+              >
+                <Building2 className="size-3.5" /> Institute Profile & Payouts
+              </Button>
+            )}
             <span className="inline-flex items-center gap-1.5 rounded-xl bg-card border border-border/80 px-3 py-1.5 text-xs font-medium text-foreground shadow-xs">
               <CheckCircle2 className="size-3.5 text-emerald-500" /> Campus Active
             </span>
@@ -368,15 +394,30 @@ export function DashboardBrandBanner({
               <Sparkles className="size-3 text-amber-300" /> Student Learning Portal
             </div>
             <h2 className="text-xl sm:text-2xl font-bold tracking-tight">
-              Welcome back, Rahul Kumar
+              Welcome back, {studentName}!
             </h2>
-            <p className="text-xs sm:text-sm text-blue-100 mt-1 max-w-xl">
-              Enrolled in: <strong className="text-white">Class 12 Advanced Physics</strong> at{" "}
-              <strong className="text-white">Apex IIT-JEE Academy</strong>.
+            <p className="text-xs sm:text-sm text-blue-100 mt-1 max-w-xl font-medium">
+              Continue learning and explore your courses.
+            </p>
+            <p className="text-xs text-blue-200 mt-1">
+              Enrolled in:{" "}
+              <strong className="text-white">
+                {enrolledCourse?.name || "Class 12 Advanced Physics"}
+              </strong>{" "}
+              at <strong className="text-white">{institute?.name || "Apex IIT-JEE Academy"}</strong>
             </p>
           </div>
         </div>
-        <div className="flex items-center gap-3 shrink-0">
+        <div className="flex flex-wrap items-center gap-2.5 shrink-0">
+          {onNavigate && (
+            <Button
+              type="button"
+              className="h-11 rounded-xl bg-white/15 hover:bg-white/25 text-white border border-white/30 px-4 text-xs font-semibold backdrop-blur-xs"
+              onClick={() => onNavigate("Fee & Payments")}
+            >
+              Fee & Payments
+            </Button>
+          )}
           <Button
             type="button"
             className="h-11 rounded-xl bg-white text-blue-700 hover:bg-blue-50 px-5 text-xs font-bold shadow-lg"
@@ -1065,7 +1106,12 @@ function Dashboard({
           key={refreshKey}
           className="mx-auto max-w-[1500px] px-3 sm:px-6 lg:px-10 py-5 sm:py-6 pb-24 sm:pb-28 lg:pb-10"
         >
-          <SectionRouter active={active} role={role} onStartTest={() => setActive("Tests")} />
+          <SectionRouter
+            active={active}
+            role={role}
+            onStartTest={() => setActive("Tests")}
+            onNavigate={(tab) => setActive(tab)}
+          />
         </main>
       </div>
 
@@ -1135,16 +1181,30 @@ function SectionRouter({
   active,
   role,
   onStartTest,
+  onNavigate,
 }: {
   active: string;
   role: Role;
   onStartTest: () => void;
+  onNavigate: (tab: string) => void;
 }) {
   if (active === "Dashboard") {
-    return role === "student" ? <StudentDashboard /> : <AdminDashboard role={role} />;
+    return role === "student" ? (
+      <StudentDashboard onStartTest={onStartTest} onNavigate={onNavigate} />
+    ) : (
+      <AdminDashboard role={role} onNavigate={onNavigate} />
+    );
   }
   if (active === "Institutes") {
-    return role === "admin" ? <InstitutesView /> : <AdminDashboard role={role} />;
+    return role === "admin" ? (
+      <InstitutesView />
+    ) : (
+      <AdminDashboard role={role} onNavigate={onNavigate} />
+    );
+  }
+  if (active === "Institute Profile") {
+    const allowedInstId = role === "institute_admin" ? "inst-1" : undefined;
+    return <InstituteProfileView selectedInstituteId={allowedInstId} />;
   }
   if (active === "Employees") {
     const allowedInstId = role === "institute_admin" ? "inst-1" : undefined;
@@ -1157,6 +1217,12 @@ function SectionRouter({
   }
   if (active === "My Courses") {
     return <StudentCoursesView onStartTest={onStartTest} />;
+  }
+  if (active === "Fee & Payments") {
+    return <StudentPaymentsView />;
+  }
+  if (active === "My Profile") {
+    return <StudentProfileView />;
   }
   if (active === "Students") {
     const allowedInstId = role === "institute_admin" ? "inst-1" : undefined;
@@ -1183,10 +1249,20 @@ function SectionRouter({
   if (active === "Settings") {
     return <SettingsView role={role === "student" ? "student" : "admin"} />;
   }
-  return role === "student" ? <StudentDashboard /> : <AdminDashboard role={role} />;
+  return role === "student" ? (
+    <StudentDashboard onStartTest={onStartTest} onNavigate={onNavigate} />
+  ) : (
+    <AdminDashboard role={role} onNavigate={onNavigate} />
+  );
 }
 
-function AdminDashboard({ role = "admin" }: { role?: Role }) {
+function AdminDashboard({
+  role = "admin",
+  onNavigate,
+}: {
+  role?: Role;
+  onNavigate?: (tab: string) => void;
+}) {
   const { institutes, employees, courses, students } = useManagement();
 
   const isInstAdmin = role === "institute_admin";
@@ -1210,6 +1286,7 @@ function AdminDashboard({ role = "admin" }: { role?: Role }) {
       "+12% this month",
       Users,
       "primary",
+      () => onNavigate && onNavigate("Students"),
     ],
     [
       isTeacher ? "Assigned Courses" : "Active Courses",
@@ -1217,6 +1294,7 @@ function AdminDashboard({ role = "admin" }: { role?: Role }) {
       "Active curriculum",
       BookOpen,
       "orange",
+      () => onNavigate && onNavigate("Courses"),
     ],
     [
       isInstAdmin || isTeacher ? "Faculty & Staff" : "Network Institutes",
@@ -1224,17 +1302,33 @@ function AdminDashboard({ role = "admin" }: { role?: Role }) {
       isInstAdmin || isTeacher ? "Active personnel" : "Affiliated branches",
       isInstAdmin || isTeacher ? Briefcase : Building2,
       "green",
+      () => onNavigate && onNavigate(isInstAdmin || isTeacher ? "Employees" : "Institutes"),
     ],
-    ["Active Tests", "86", "Live test series", ClipboardCheck, "pink"],
+    [
+      "Active Tests",
+      "86",
+      "Live test series",
+      ClipboardCheck,
+      "pink",
+      () => onNavigate && onNavigate("Tests"),
+    ],
   ] as const;
 
   return (
     <div className="animate-rise space-y-6">
-      <DashboardBrandBanner role={role} />
+      <DashboardBrandBanner role={role} onNavigate={onNavigate} />
 
       <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 xl:grid-cols-4">
-        {cards.map(([label, value, note, Icon, color]) => (
-          <StatCard key={label} label={label} value={value} note={note} Icon={Icon} color={color} />
+        {cards.map(([label, value, note, Icon, color, onClick]) => (
+          <StatCard
+            key={label}
+            label={label}
+            value={value}
+            note={note}
+            Icon={Icon}
+            color={color}
+            onClick={onClick}
+          />
         ))}
       </div>
 
@@ -1263,45 +1357,66 @@ function AdminDashboard({ role = "admin" }: { role?: Role }) {
   );
 }
 
-function StudentDashboard() {
+function StudentDashboard({
+  onStartTest,
+  onNavigate,
+}: {
+  onStartTest?: () => void;
+  onNavigate?: (tab: string) => void;
+}) {
   const [testOpen, setTestOpen] = useState(false);
+  const { currentStudent, courses, getPaymentsByStudent } = useManagement();
 
   if (testOpen) {
     return <TestFlow onExit={() => setTestOpen(false)} />;
   }
 
+  const enrolledCourse = courses.find((c) => c.id === currentStudent?.courseId);
+  const payments = currentStudent ? getPaymentsByStudent(currentStudent.id) : [];
+  const pendingPayment = payments.find((p) => p.status === "Pending");
+
   return (
     <div className="animate-rise space-y-6">
-      <DashboardBrandBanner role="student" onStartTest={() => setTestOpen(true)} />
+      <DashboardBrandBanner
+        role="student"
+        onStartTest={() => (onStartTest ? onStartTest() : setTestOpen(true))}
+        onNavigate={onNavigate}
+      />
 
       <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard
+          label="Enrolled Program"
+          value="1"
+          note={enrolledCourse?.code || "Class 12 Adv"}
+          Icon={BookOpen}
+          color="primary"
+          onClick={() => onNavigate && onNavigate("My Courses")}
+        />
+        <StatCard
+          label="Tuition Fee Due"
+          value={
+            pendingPayment ? `₹${pendingPayment.amount.toLocaleString("en-IN")}` : "Fee Cleared"
+          }
+          note={pendingPayment ? `Due: ${pendingPayment.dueDate}` : "Verified via OTP"}
+          Icon={CreditCard}
+          color="orange"
+          onClick={() => onNavigate && onNavigate("Fee & Payments")}
+        />
+        <StatCard
           label="My Tests"
           value="12"
-          note="3 pending"
+          note="3 pending tests"
           Icon={ClipboardCheck}
-          color="primary"
+          color="green"
+          onClick={() => onNavigate && onNavigate("My Tests")}
         />
         <StatCard
           label="My Results"
           value="84%"
           note="+6% this month"
           Icon={Trophy}
-          color="orange"
-        />
-        <StatCard
-          label="Test Series"
-          value="5"
-          note="2 in progress"
-          Icon={FileText}
-          color="green"
-        />
-        <StatCard
-          label="Study Material"
-          value="28"
-          note="6 new resources"
-          Icon={BookOpen}
           color="pink"
+          onClick={() => onNavigate && onNavigate("My Results")}
         />
       </div>
 
@@ -1330,7 +1445,7 @@ function StudentDashboard() {
         subtitle="Stay prepared for your next challenges"
         action="Full Calendar"
       >
-        <StudentExams onStart={() => setTestOpen(true)} />
+        <StudentExams onStart={() => (onStartTest ? onStartTest() : setTestOpen(true))} />
       </Panel>
     </div>
   );
@@ -1342,15 +1457,23 @@ function StatCard({
   note,
   Icon,
   color,
+  onClick,
 }: {
   label: string;
   value: string;
   note: string;
   Icon: IconType;
   color: string;
+  onClick?: () => void;
 }) {
   return (
-    <article className="glass-card glass-card-interactive group p-5">
+    <article
+      onClick={onClick}
+      className={cn(
+        "glass-card glass-card-interactive group p-5 transition-all duration-200",
+        onClick && "cursor-pointer hover:border-primary/40",
+      )}
+    >
       <div className="flex items-start justify-between">
         <div
           className={cn(

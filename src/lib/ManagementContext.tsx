@@ -4,10 +4,12 @@ import {
   type Employee,
   type Course,
   type Student,
+  type StudentPayment,
   initialInstitutes,
   initialEmployees,
   initialCourses,
   initialStudents,
+  initialStudentPayments,
 } from "./managementData";
 
 interface ManagementContextType {
@@ -15,13 +17,21 @@ interface ManagementContextType {
   employees: Employee[];
   courses: Course[];
   students: Student[];
+  payments: StudentPayment[];
   currentInstituteId: string | null;
   setCurrentInstituteId: (id: string | null) => void;
-  // Institute CRUD
+  currentStudentId: string;
+  setCurrentStudentId: (id: string) => void;
+  currentStudent: Student | undefined;
+  // Institute CRUD & Profile
   addInstitute: (inst: Omit<Institute, "id" | "createdAt">) => Institute;
   updateInstitute: (id: string, inst: Partial<Institute>) => void;
   deleteInstitute: (id: string) => void;
   toggleInstituteStatus: (id: string) => void;
+  verifyInstitutePayout: (
+    instituteId: string,
+    enteredOtp: string,
+  ) => { success: boolean; message: string };
   // Employee CRUD
   addEmployee: (emp: Omit<Employee, "id">) => Employee;
   updateEmployee: (id: string, emp: Partial<Employee>) => void;
@@ -32,11 +42,20 @@ interface ManagementContextType {
   updateCourse: (id: string, crs: Partial<Course>) => void;
   deleteCourse: (id: string) => void;
   toggleCourseStatus: (id: string) => void;
-  // Student CRUD
+  // Student CRUD & Profile
   addStudent: (stu: Omit<Student, "id">) => Student;
   updateStudent: (id: string, stu: Partial<Student>) => void;
   deleteStudent: (id: string) => void;
   toggleStudentStatus: (id: string) => void;
+  // Payments
+  addPayment: (payment: Omit<StudentPayment, "id">) => StudentPayment;
+  updatePayment: (id: string, payment: Partial<StudentPayment>) => void;
+  processStudentPayment: (
+    paymentId: string,
+    method: string,
+    enteredOtp: string,
+  ) => { success: boolean; message: string; receiptNumber?: string };
+  simulateFailedPayment: (paymentId: string, reason?: string) => void;
   // Helpers
   getInstitute: (id: string) => Institute | undefined;
   getCourse: (id: string) => Course | undefined;
@@ -46,6 +65,8 @@ interface ManagementContextType {
   getEmployeesByInstitute: (instituteId: string) => Employee[];
   getStudentsByInstitute: (instituteId: string) => Student[];
   getStudentsByCourse: (courseId: string) => Student[];
+  getPaymentsByStudent: (studentId: string) => StudentPayment[];
+  getPaymentsByInstitute: (instituteId: string) => StudentPayment[];
 }
 
 const ManagementContext = createContext<ManagementContextType | null>(null);
@@ -87,7 +108,17 @@ export function ManagementProvider({ children }: { children: React.ReactNode }) 
     }
   });
 
+  const [payments, setPayments] = useState<StudentPayment[]>(() => {
+    try {
+      const stored = window.localStorage.getItem("coachingapp-payments");
+      return stored ? JSON.parse(stored) : initialStudentPayments;
+    } catch {
+      return initialStudentPayments;
+    }
+  });
+
   const [currentInstituteId, setCurrentInstituteId] = useState<string | null>(null);
+  const [currentStudentId, setCurrentStudentId] = useState<string>("stu-1");
 
   useEffect(() => {
     try {
@@ -121,6 +152,14 @@ export function ManagementProvider({ children }: { children: React.ReactNode }) 
     }
   }, [students]);
 
+  useEffect(() => {
+    try {
+      window.localStorage.setItem("coachingapp-payments", JSON.stringify(payments));
+    } catch (e) {
+      console.warn("Could not persist payments", e);
+    }
+  }, [payments]);
+
   // Institute Actions
   const addInstitute = (inst: Omit<Institute, "id" | "createdAt">): Institute => {
     const newInst: Institute = {
@@ -148,6 +187,44 @@ export function ManagementProvider({ children }: { children: React.ReactNode }) 
           : inst,
       ),
     );
+  };
+
+  const verifyInstitutePayout = (
+    instituteId: string,
+    enteredOtp: string,
+  ): { success: boolean; message: string } => {
+    // Demo OTP is 123456
+    const cleanOtp = enteredOtp.trim();
+    if (cleanOtp !== "123456" && cleanOtp !== "000000") {
+      return {
+        success: false,
+        message:
+          "Invalid OTP code. Please enter the demo code 123456 to verify settlement credentials.",
+      };
+    }
+
+    const today = new Date().toISOString().split("T")[0];
+    setInstitutes((prev) =>
+      prev.map((inst) => {
+        if (inst.id === instituteId) {
+          return {
+            ...inst,
+            bankDetails: inst.bankDetails
+              ? { ...inst.bankDetails, isVerified: true, verifiedAt: today }
+              : undefined,
+            upiDetails: inst.upiDetails
+              ? { ...inst.upiDetails, isVerified: true, verifiedAt: today }
+              : undefined,
+          };
+        }
+        return inst;
+      }),
+    );
+
+    return {
+      success: true,
+      message: "Institute bank and UPI settlement payout details successfully verified with OTP.",
+    };
   };
 
   // Employee Actions
@@ -228,7 +305,80 @@ export function ManagementProvider({ children }: { children: React.ReactNode }) 
     );
   };
 
+  // Payment Actions
+  const addPayment = (payment: Omit<StudentPayment, "id">): StudentPayment => {
+    const newPayment: StudentPayment = {
+      ...payment,
+      id: `pay-${Date.now()}`,
+    };
+    setPayments((prev) => [newPayment, ...prev]);
+    return newPayment;
+  };
+
+  const updatePayment = (id: string, updated: Partial<StudentPayment>) => {
+    setPayments((prev) => prev.map((pay) => (pay.id === id ? { ...pay, ...updated } : pay)));
+  };
+
+  const processStudentPayment = (
+    paymentId: string,
+    method: string,
+    enteredOtp: string,
+  ): { success: boolean; message: string; receiptNumber?: string } => {
+    const cleanOtp = enteredOtp.trim();
+    if (cleanOtp !== "123456" && cleanOtp !== "000000") {
+      return {
+        success: false,
+        message: "Invalid OTP code. For demo simulation, please enter 123456.",
+      };
+    }
+
+    const receiptNumber = `REC-${new Date().getFullYear()}-${Math.floor(10000 + Math.random() * 90000)}`;
+    const transactionId = `TXN-DEMO-${Date.now().toString().slice(-8)}`;
+    const today = new Date().toISOString().split("T")[0];
+
+    setPayments((prev) =>
+      prev.map((p) =>
+        p.id === paymentId
+          ? {
+              ...p,
+              status: "Paid",
+              paidDate: today,
+              paymentMethod: method,
+              transactionId,
+              receiptNumber,
+              notes: "Payment verified via OTP authentication.",
+            }
+          : p,
+      ),
+    );
+
+    return {
+      success: true,
+      message: "Payment successfully verified and completed.",
+      receiptNumber,
+    };
+  };
+
+  const simulateFailedPayment = (
+    paymentId: string,
+    reason = "Transaction declined by issuing bank during authentication.",
+  ) => {
+    setPayments((prev) =>
+      prev.map((p) =>
+        p.id === paymentId
+          ? {
+              ...p,
+              status: "Failed",
+              transactionId: `TXN-FL-${Date.now().toString().slice(-6)}`,
+              notes: reason,
+            }
+          : p,
+      ),
+    );
+  };
+
   // Helpers
+  const currentStudent = students.find((s) => s.id === currentStudentId) || students[0];
   const getInstitute = (id: string) => institutes.find((i) => i.id === id);
   const getCourse = (id: string) => courses.find((c) => c.id === id);
   const getEmployee = (id: string) => employees.find((e) => e.id === id);
@@ -245,6 +395,12 @@ export function ManagementProvider({ children }: { children: React.ReactNode }) 
 
   const getStudentsByCourse = (courseId: string) => students.filter((s) => s.courseId === courseId);
 
+  const getPaymentsByStudent = (studentId: string) =>
+    payments.filter((p) => p.studentId === studentId);
+
+  const getPaymentsByInstitute = (instituteId: string) =>
+    payments.filter((p) => p.instituteId === instituteId);
+
   return (
     <ManagementContext.Provider
       value={{
@@ -252,12 +408,17 @@ export function ManagementProvider({ children }: { children: React.ReactNode }) 
         employees,
         courses,
         students,
+        payments,
         currentInstituteId,
         setCurrentInstituteId,
+        currentStudentId,
+        setCurrentStudentId,
+        currentStudent,
         addInstitute,
         updateInstitute,
         deleteInstitute,
         toggleInstituteStatus,
+        verifyInstitutePayout,
         addEmployee,
         updateEmployee,
         deleteEmployee,
@@ -270,6 +431,10 @@ export function ManagementProvider({ children }: { children: React.ReactNode }) 
         updateStudent,
         deleteStudent,
         toggleStudentStatus,
+        addPayment,
+        updatePayment,
+        processStudentPayment,
+        simulateFailedPayment,
         getInstitute,
         getCourse,
         getEmployee,
@@ -278,6 +443,8 @@ export function ManagementProvider({ children }: { children: React.ReactNode }) 
         getEmployeesByInstitute,
         getStudentsByInstitute,
         getStudentsByCourse,
+        getPaymentsByStudent,
+        getPaymentsByInstitute,
       }}
     >
       {children}

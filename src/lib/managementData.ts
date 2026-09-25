@@ -1,3 +1,20 @@
+export interface InstituteBankDetails {
+  bankName: string;
+  accountName: string;
+  accountNumber: string;
+  ifscCode: string;
+  branch: string;
+  isVerified: boolean;
+  verifiedAt?: string;
+}
+
+export interface InstituteUpiDetails {
+  upiId: string;
+  qrCodeUrl?: string;
+  isVerified: boolean;
+  verifiedAt?: string;
+}
+
 export interface Institute {
   id: string;
   name: string;
@@ -10,6 +27,10 @@ export interface Institute {
   state: string;
   status: "Active" | "Inactive";
   createdAt: string;
+  logoUrl?: string;
+  gstNumber?: string;
+  bankDetails?: InstituteBankDetails;
+  upiDetails?: InstituteUpiDetails;
 }
 
 export type EmployeeRole = "Admin" | "Institute Admin" | "Teacher" | "Employee" | "Staff";
@@ -58,6 +79,25 @@ export interface Student {
   status: "Active" | "Inactive";
   attendanceRate: number;
   averageScore: number;
+  guardianName?: string;
+  guardianPhone?: string;
+  avatarUrl?: string;
+}
+
+export interface StudentPayment {
+  id: string;
+  studentId: string;
+  courseId: string;
+  instituteId: string;
+  title: string;
+  amount: number;
+  dueDate: string;
+  paidDate?: string;
+  status: "Paid" | "Pending" | "Failed";
+  transactionId?: string;
+  paymentMethod?: string;
+  receiptNumber?: string;
+  notes?: string;
 }
 
 export const initialInstitutes: Institute[] = [
@@ -73,6 +113,23 @@ export const initialInstitutes: Institute[] = [
     state: "Delhi",
     status: "Active",
     createdAt: "2023-04-10",
+    logoUrl:
+      "https://images.unsplash.com/photo-1546410531-bb4caa6b424d?w=150&auto=format&fit=crop&q=80",
+    gstNumber: "07AAAAA0000A1Z5",
+    bankDetails: {
+      bankName: "HDFC Bank Ltd",
+      accountName: "Apex IIT-JEE Educational Foundation",
+      accountNumber: "50200088991234",
+      ifscCode: "HDFC0001234",
+      branch: "Institutional Area Sector 14, New Delhi",
+      isVerified: true,
+      verifiedAt: "2024-01-15",
+    },
+    upiDetails: {
+      upiId: "apexacademy@hdfcbank",
+      isVerified: true,
+      verifiedAt: "2024-01-15",
+    },
   },
   {
     id: "inst-2",
@@ -86,6 +143,23 @@ export const initialInstitutes: Institute[] = [
     state: "Maharashtra",
     status: "Active",
     createdAt: "2023-06-15",
+    logoUrl:
+      "https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=150&auto=format&fit=crop&q=80",
+    gstNumber: "27BBBBB1111B1Z2",
+    bankDetails: {
+      bankName: "ICICI Bank Ltd",
+      accountName: "Zenith Healthcare & Medical Ed",
+      accountNumber: "102938475612",
+      ifscCode: "ICIC0000987",
+      branch: "Mindspace Malad West, Mumbai",
+      isVerified: true,
+      verifiedAt: "2024-02-10",
+    },
+    upiDetails: {
+      upiId: "zenithmedical@icici",
+      isVerified: true,
+      verifiedAt: "2024-02-10",
+    },
   },
   {
     id: "inst-3",
@@ -99,6 +173,21 @@ export const initialInstitutes: Institute[] = [
     state: "Karnataka",
     status: "Active",
     createdAt: "2023-08-20",
+    logoUrl:
+      "https://images.unsplash.com/photo-1509062522246-3755977927d7?w=150&auto=format&fit=crop&q=80",
+    gstNumber: "29CCCCC2222C1Z8",
+    bankDetails: {
+      bankName: "State Bank of India",
+      accountName: "Scholars Foundation Society",
+      accountNumber: "389201928312",
+      ifscCode: "SBIN0004521",
+      branch: "HSR Layout Sector 2, Bengaluru",
+      isVerified: false,
+    },
+    upiDetails: {
+      upiId: "scholarsblr@sbi",
+      isVerified: false,
+    },
   },
 ];
 
@@ -356,5 +445,88 @@ export const initialStudents: Student[] = [
     status: "Inactive",
     attendanceRate: 78,
     averageScore: 72,
+  },
+];
+
+export const initialStudentPayments: StudentPayment[] = [
+  {
+    id: "pay-1",
+    studentId: "stu-1", // Rahul Kumar
+    courseId: "crs-1",
+    instituteId: "inst-1",
+    title: "Class 12 Physics - Term 1 Admission & Tuition",
+    amount: 22500,
+    dueDate: "2024-04-10",
+    paidDate: "2024-04-05",
+    status: "Paid",
+    transactionId: "TXN-APEX-9823101",
+    paymentMethod: "UPI (apexacademy@hdfcbank)",
+    receiptNumber: "REC-APEX-2024-001",
+    notes: "Online UPI payment received and verified.",
+  },
+  {
+    id: "pay-2",
+    studentId: "stu-1", // Rahul Kumar
+    courseId: "crs-1",
+    instituteId: "inst-1",
+    title: "Class 12 Physics - Term 2 Examination & Lab Fee",
+    amount: 22500,
+    dueDate: "2024-10-15",
+    status: "Pending",
+    notes: "Due before the second semester commencement.",
+  },
+  {
+    id: "pay-3",
+    studentId: "stu-2", // Aarav Sharma
+    courseId: "crs-2",
+    instituteId: "inst-1",
+    title: "Class 11 JEE Maths - Full Academic Year Fee",
+    amount: 42000,
+    dueDate: "2024-05-10",
+    paidDate: "2024-05-02",
+    status: "Paid",
+    transactionId: "TXN-APEX-8761244",
+    paymentMethod: "Net Banking (SBI)",
+    receiptNumber: "REC-APEX-2024-002",
+    notes: "One-time full payment discount applied.",
+  },
+  {
+    id: "pay-4",
+    studentId: "stu-3", // Ishita Sen
+    courseId: "crs-3",
+    instituteId: "inst-2",
+    title: "NEET Comprehensive Biology - Installment 1",
+    amount: 19000,
+    dueDate: "2024-06-10",
+    paidDate: "2024-06-03",
+    status: "Paid",
+    transactionId: "TXN-ZEN-5544211",
+    paymentMethod: "UPI (zenithmedical@icici)",
+    receiptNumber: "REC-ZEN-2024-089",
+    notes: "Initial installment processed successfully.",
+  },
+  {
+    id: "pay-5",
+    studentId: "stu-3", // Ishita Sen
+    courseId: "crs-3",
+    instituteId: "inst-2",
+    title: "NEET Comprehensive Biology - Installment 2",
+    amount: 19000,
+    dueDate: "2024-11-01",
+    status: "Pending",
+    notes: "Second installment due in November.",
+  },
+  {
+    id: "pay-6",
+    studentId: "stu-4", // Rohan Verma
+    courseId: "crs-4",
+    instituteId: "inst-3",
+    title: "Class 10 Foundation Science - Term 1 Fee",
+    amount: 14000,
+    dueDate: "2024-07-15",
+    status: "Failed",
+    transactionId: "TXN-FL-330192",
+    paymentMethod: "Debit Card",
+    notes: "Bank network timeout during authorization. Retry available.",
   },
 ];

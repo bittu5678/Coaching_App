@@ -18,12 +18,16 @@ import {
   Trash2,
   Power,
   X,
+  CreditCard,
+  ShieldCheck,
+  QrCode,
 } from "lucide-react";
 import { useManagement } from "@/lib/ManagementContext";
 import { type Institute } from "@/lib/managementData";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { InstituteProfileView } from "./InstituteProfileView";
 
 export function InstitutesView() {
   const {
@@ -42,6 +46,7 @@ export function InstitutesView() {
   const [addModalOpen, setAddModalOpen] = useState(false);
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [viewModalOpen, setViewModalOpen] = useState(false);
+  const [profileModalOpen, setProfileModalOpen] = useState(false);
   const [selectedInstitute, setSelectedInstitute] = useState<Institute | null>(null);
 
   // Form state
@@ -324,6 +329,18 @@ export function InstitutesView() {
                       </td>
                       <td className="py-3.5 text-right pr-4 sm:pr-0">
                         <div className="flex items-center justify-end gap-1">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="size-8 rounded-lg text-primary hover:bg-primary/10"
+                            title="Institute Profile, Bank & UPI Settings"
+                            onClick={() => {
+                              setSelectedInstitute(inst);
+                              setProfileModalOpen(true);
+                            }}
+                          >
+                            <CreditCard className="size-3.5" />
+                          </Button>
                           <Button
                             variant="ghost"
                             size="icon"
@@ -798,28 +815,118 @@ export function InstitutesView() {
                   </div>
                 </div>
               </div>
+
+              {/* Payment Receiving & Legal Details */}
+              <div>
+                <h4 className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2">
+                  Payout Settlement & Legal Status
+                </h4>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-muted/30 p-3.5 rounded-xl text-xs">
+                  <div>
+                    <span className="text-[10px] text-muted-foreground uppercase font-bold block">
+                      GST Registration
+                    </span>
+                    <span className="font-mono text-foreground font-semibold">
+                      {selectedInstitute.gstNumber || "Not registered / Exempted"}
+                    </span>
+                  </div>
+                  <div>
+                    <span className="text-[10px] text-muted-foreground uppercase font-bold block">
+                      Payout Verification
+                    </span>
+                    {selectedInstitute.bankDetails?.isVerified ? (
+                      <span className="text-emerald-600 dark:text-emerald-400 font-semibold flex items-center gap-1">
+                        <ShieldCheck className="size-3.5" /> OTP Verified
+                      </span>
+                    ) : (
+                      <span className="text-amber-600 dark:text-amber-400 font-semibold">
+                        Pending OTP Verification
+                      </span>
+                    )}
+                  </div>
+                  <div>
+                    <span className="text-[10px] text-muted-foreground uppercase font-bold block">
+                      Receiving Bank
+                    </span>
+                    <span className="text-foreground">
+                      {selectedInstitute.bankDetails?.bankName || "No bank details added"} ·{" "}
+                      {selectedInstitute.bankDetails?.accountNumber
+                        ? `••••${selectedInstitute.bankDetails.accountNumber.slice(-4)}`
+                        : ""}
+                    </span>
+                  </div>
+                  <div>
+                    <span className="text-[10px] text-muted-foreground uppercase font-bold block">
+                      Receiving UPI ID
+                    </span>
+                    <span className="font-mono text-foreground">
+                      {selectedInstitute.upiDetails?.upiId || "None"}
+                    </span>
+                  </div>
+                </div>
+              </div>
             </div>
 
-            <div className="mt-6 flex justify-end gap-3 pt-3 border-t border-border">
+            <div className="mt-6 flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-border">
               <Button
                 type="button"
                 variant="outline"
-                className="rounded-xl h-10 text-xs px-4"
-                onClick={() => setViewModalOpen(false)}
-              >
-                Close
-              </Button>
-              <Button
-                type="button"
+                className="rounded-xl h-10 text-xs px-4 gap-1.5"
                 onClick={() => {
                   setViewModalOpen(false);
-                  handleOpenEdit(selectedInstitute);
+                  setProfileModalOpen(true);
                 }}
-                className="btn-gradient rounded-xl h-10 text-xs px-5 font-semibold"
               >
-                Edit Institute
+                <CreditCard className="size-3.5" /> Full Profile & Payout Settings
+              </Button>
+
+              <div className="flex items-center gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="rounded-xl h-10 text-xs px-4"
+                  onClick={() => setViewModalOpen(false)}
+                >
+                  Close
+                </Button>
+                <Button
+                  type="button"
+                  onClick={() => {
+                    setViewModalOpen(false);
+                    handleOpenEdit(selectedInstitute);
+                  }}
+                  className="btn-gradient rounded-xl h-10 text-xs px-5 font-semibold"
+                >
+                  Edit Institute
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Comprehensive Institute Profile Modal */}
+      {profileModalOpen && selectedInstitute && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-xs overflow-y-auto">
+          <div className="glass-card w-full max-w-4xl rounded-2xl p-6 sm:p-8 shadow-2xl border border-border/80 animate-rise bg-card max-h-[92vh] overflow-y-auto">
+            <div className="flex items-center justify-between pb-3 border-b border-border/60 mb-5">
+              <div className="flex items-center gap-2">
+                <Building2 className="size-5 text-primary" />
+                <h3 className="text-base font-bold text-foreground">
+                  Institute Profile, GST & Payment Gateways
+                </h3>
+              </div>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="size-8 rounded-lg"
+                onClick={() => setProfileModalOpen(false)}
+              >
+                <X className="size-4" />
               </Button>
             </div>
+
+            <InstituteProfileView selectedInstituteId={selectedInstitute.id} />
           </div>
         </div>
       )}
